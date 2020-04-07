@@ -1,0 +1,42 @@
+{% load static %}
+
+<header class="blog-header border-bottom py-2 mb-3">
+    <nav class="navbar">
+
+        <a class="navbar-brand text-decoration-none text-dark" href="{% url 'home' %}">Legen... Ask For It!</a>
+
+        <form class="form-inline">
+            <input class="form-control mr-2" type="search" placeholder="Search" aria-label="Search">
+            <a href="{% url 'ask' %}" class="btn my-2 my-sm-0 btn-success" role="button" aria-pressed="true">ASK!</a>
+        </form>
+
+        {% if registred_user %}
+            <div class="nav-item nav-link">
+                <div class="row">
+
+                    <div class="col-sm-5">
+                        <img class="align-content-center rounded" width="64" height="64"
+                                 src="{% static 'img/avatar.png' %}">
+                    </div>
+
+                    <div class="col-sm-7">
+                        <div class="row">
+                            <p class="mb-1 p-1">Dr.Pepper</p>
+                        </div>
+                        <div class="row">
+                            <a class="p-1" href="{% url 'setting' %}">Settings</a>
+                            <a class="p-1" href="{% url 'home' %}">Log out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="nav-item nav-link">
+                <a class="p-1" href="{% url 'login' %}">Log in</a>
+                <a class="p-1" href="{% url 'signup' %}">Register</a>
+            </div>
+        {% endif %}
+
+
+    </nav>
+</header>
