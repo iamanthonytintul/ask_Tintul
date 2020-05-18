@@ -1,21 +1,39 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.core.paginator import Paginator, PageNotAnInteger
 
 # Create your views here.
 
-questions = {
-    i: {'id': i, 'title': f'Question #{i}'}
-    for i in range(1, 5)
-}
+questions = [
+    {'id': i, 'title': f'Question #{i}'}
+    for i in range(1, 36)
+]
 questions_tags = {
     i: {'tag_id': i, 'title': 'bender'}
     for i in range(1, 5)
 }
 
+def paginate(object_list, request, per_page=10):
+    p = Paginator(object_list, per_page)
+    return p
+
 def index(request):
+    p = paginate(questions, request, 5)
+    page_num = request.GET.get('page')
+
+    if page_num == None:
+        page_num = 1
+
+    page_obj = p.get_page(page_num)
+
+    # try:
+    #     questions = p.page(page)
+    # except PageNotAnInteger:
+    #     questions = p.page(1)
     return render(request, 'main_page.html', {
         'registred_user': 'Ivan',
-        'questions': questions.values(),
+        'questions': page_obj,
+        'page': p.page(page_num),
     })
 
 
@@ -28,7 +46,7 @@ def ask(request):
 
 
 def question(request, qid):
-    question = questions.get(qid)
+    question = questions[qid]
     return render(request, 'question_page.html', {
         'registred_user': 'Ivan',
         'question': question,
@@ -57,4 +75,3 @@ def setting(request):
         'registred_user': 'Ivan',
         'text_fields': ['Login', 'Email', 'Nickname'],
         })
-
