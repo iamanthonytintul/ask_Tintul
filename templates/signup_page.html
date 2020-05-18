@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+    <div class="row pl-3 py-2">
+        <h4 class="pb-2">Sign Up</h4>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    {% if error %}
+        <div class="row">
+            <div class="d-flex col-md-4 align-content-center">
+                <p class="p-2 alert-danger">Sorry, you have empty fields</p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% for text in text_fields %}
+        <div class="row">
+
+            <div class="col-md-3">
+                <p class="p-2">{{ text }}</p>
+            </div>
+
+            <div class="col-md-9 input-group mb-3">
+                <input type="text" class="form-control" placeholder="{{ text|lower }}">
+            </div>
+
+        </div>
+    {% endfor %}
+
+    {% for pass in password_fields %}
+        <div class="row">
+
+            <div class="col-md-3">
+                <p class="p-2">{{ pass }}</p>
+            </div>
+
+            <div class="col-md-9 input-group mb-3">
+                <input type="password" id="inputPassword" class="form-control" placeholder="{{ pass|lower }}"
+                       required="">
+            </div>
+
+        </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-md-3">
+            <p class="p-2">Upload Avatar</p>
+        </div>
+        <div class="col-md-9">
+            <div class="input-group mb-3">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input">
+                    <label class="custom-file-label">Choose file</label>
+                </div>
+                <button type="button" class="ml-2 mb-2 btn btn-success">Choose</button>
+            </div>
+
+            <button type="button" class="mb-2 btn btn-success">Register!</button>
+
+        </div>
+
+    </div>
+
+{% endblock %}

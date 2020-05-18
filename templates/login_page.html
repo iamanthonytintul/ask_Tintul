@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+    <div class="row pl-3 py-2">
+        <h4 class="pr-2">Log In</h4>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-2">
+            <p class="p-2">Login</p>
+        </div>
+        <div class="col-md-10 input-group mb-3">
+            <input type="text" class="form-control" placeholder="Login" aria-label="Username"
+                   aria-describedby="basic-addon1">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <p class="p-2">Password</p>
+        </div>
+        <div class="col-md-10">
+            <div class="input-group mb-3">
+                <input type="password" id="inputPassword" class="form-control" placeholder="Password"
+                       required="">
+
+            </div>
+
+            <a href="main_page.html" class="btn my-2 my-sm-0 btn-success" role="button" aria-pressed="true">Log In!</a>
+            <div class="my-2">
+                <a href="#">Create new account</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% include 'inc/head_question.html' %}
+
+    {% for answer in answers %}
+        {% include 'inc/answer.html' %}
+    {% endfor %}
+
+    <hr>
+    <div class="mb-3 input-group">
+        <textarea class="form-control" placeholder="Enter your answer" aria-label="With textarea"></textarea>
+    </div>
+
+    <button type="button" class="mb-2 btn btn-success">Answer</button>
+
+{% endblock %}

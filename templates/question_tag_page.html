@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+    <div class="row pl-3 py-2">
+        <h4 class="pr-2">Tag: bender</h4>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    {% for question in questions-by-tag %}
+        {% include 'inc/question.html' %}
+    {% endfor %}
+
+    {% include 'inc/pagination.html' %}
+
+{% endblock %}

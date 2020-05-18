@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+    <div class="row pl-3 py-2">
+        <h4 class="pb-2">New Question</h4>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    {% if error %}
+        <div class="row">
+            <div class="d-flex col-md-4 align-content-center">
+                <p class="p-2 alert-danger">Sorry, you have empty fields</p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% for text in text_fields %}
+        <div class="row">
+
+            <div class="col-md-2">
+                <p class="p-2">{{ text }}</p>
+            </div>
+
+            <div class="col-md-10 input-group mb-3">
+                <input type="text" class="form-control" placeholder="{{ text|lower }}">
+            </div>
+
+        </div>
+    {% endfor %}
+
+    {% for text in text_areas %}
+        <div class="row">
+
+            <div class="col-md-2">
+                <p class="p-2">{{ text }}</p>
+            </div>
+
+            <div class="col-md-10 input-group mb-3">
+                    <textarea class="form-control" placeholder="{{ text|lower }}"></textarea>
+            </div>
+
+        </div>
+    {% endfor %}
+
+
+    <div class="d-flex justify-content-end">
+        <button type="button" class="mb-2 btn btn-success">ASK!</button>
+
+    </div>
+
+{% endblock %}

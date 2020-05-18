@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block page_title %}
+    <div class="row pl-3 py-2">
+        <h4 class="pb-2">Settings: Dr.Pepper</h4>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    {% for text in text_fields %}
+        <div class="row">
+
+            <div class="col-md-3">
+                <p class="p-2">{{ text }}</p>
+            </div>
+
+            <div class="col-md-9 input-group mb-3">
+                <input type="text" class="form-control" value="{{ text|lower }}">
+            </div>
+
+        </div>
+    {% endfor %}
+
+
+    <div class="row">
+        <div class="col-md-3">
+            <p class="p-2">Avatar</p>
+        </div>
+        <div class="col-md-9">
+            <img class="align-content-center rounded mb-2" width="128" height="128"
+                     src="{% static 'img/avatar.png' %}">
+            <div class="input-group mb-3">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input">
+                    <label class="custom-file-label">Choose file</label>
+                </div>
+                <button type="button" class="ml-2 mb-2 btn btn-success">Choose</button>
+            </div>
+
+            <button type="button" class="mb-2 btn btn-success"><a href="{% url 'index' %}" class="text-decoration-none text-white">Save</a></button>
+
+        </div>
+
+    </div>
+
+{% endblock %}
