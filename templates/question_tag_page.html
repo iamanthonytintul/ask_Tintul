@@ -2,13 +2,13 @@
 
 {% block page_title %}
     <div class="row pl-3 py-2">
-        <h4 class="pr-2">Tag: bender</h4>
+        <h4 class="pr-2">Tag: {{ tag.tag_name }}</h4>
     </div>
 {% endblock %}
 
 {% block content %}
 
-    {% for question in questions-by-tag %}
+    {% for question in questions %}
         {% include 'inc/question.html' %}
     {% endfor %}
 

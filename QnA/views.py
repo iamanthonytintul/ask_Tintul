@@ -1,60 +1,56 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.paginator import Paginator, PageNotAnInteger
+from django.shortcuts import get_object_or_404
+from QnA import models
 
-# Create your views here.
 
-questions = [
-    {'id': i, 'title': f'Question #{i}'}
-    for i in range(1, 36)
-]
-questions_tags = {
-    i: {'tag_id': i, 'title': 'bender'}
-    for i in range(1, 5)
-}
-
-def paginate(object_list, request, per_page=10):
+def paginate(object_list, request, per_page=5):
     p = Paginator(object_list, per_page)
     return p
 
+
 def index(request):
+    questions = models.Question.objects.new()
     p = paginate(questions, request, 5)
     page_num = request.GET.get('page')
-
-    if page_num == None:
+    if page_num is None:
         page_num = 1
-
     page_obj = p.get_page(page_num)
 
-    # try:
-    #     questions = p.page(page)
-    # except PageNotAnInteger:
-    #     questions = p.page(1)
+    # like_dislike = models.LikeDislike.objects.all()
+
     return render(request, 'main_page.html', {
-        'registred_user': 'Ivan',
+        'registered_user': 'Ivan',
         'questions': page_obj,
+        'question_tags': models.Question.objects.all_tags(),
         'page': p.page(page_num),
     })
 
 
 def ask(request):
     return render(request, 'ask_page.html', {
-        'registred_user': 'Ivan',
+        'registered_user': 'Ivan',
         'text_fields': ['Title', 'Tags', ],
         'text_areas': ['Question', ],
     })
 
 
 def question(request, qid):
-    question = questions[qid]
+    question_ = get_object_or_404(models.Question, pk=qid)
+    answers = list(models.Question.objects.answers(question_.id))
+
     return render(request, 'question_page.html', {
-        'registred_user': 'Ivan',
-        'question': question,
-        'answers': range(5)
+        'registered_user': 'Ivan',
+        'question': question_,
+        'answers': answers,
+        'tag': models.Question.objects.tag(qid),
     })
+
 
 def login(request):
     return render(request, 'login_page.html', {})
+
 
 def signup(request):
     return render(request, 'signup_page.html', {
@@ -63,15 +59,41 @@ def signup(request):
         'text_areas': ['Question', ],
     })
 
-def questions_tags(request, tag_id):
-    question_tags = questions_tags.get(tag_id)
+
+def questions_tags(request, tid):
+    tag = get_object_or_404(models.Tag, pk=tid)
+    questions = tag.Questions.all()
+    p = paginate(questions, request, 5)
+    page_num = request.GET.get('page')
+    if page_num is None:
+        page_num = 1
+    page_obj = p.get_page(page_num)
     return render(request, 'question_tag_page.html', {
-        'registred_user': 'Ivan',
-        'questions-by-tag': question_tags,
+        'registered_user': 'Ivan',
+        'tag': tag,
+        'question_tags': models.Question.objects.all_tags(),
+        'questions': questions,
+        'page': p.page(page_num)
     })
+
 
 def setting(request):
     return render(request, 'setting_page.html', {
-        'registred_user': 'Ivan',
+        'registered_user': 'Ivan',
         'text_fields': ['Login', 'Email', 'Nickname'],
-        })
+    })
+
+def hot_question(request):
+    hot_questions = models.Question.objects.popular()
+    p = paginate(hot_questions, request, 5)
+    page_num = request.GET.get('page')
+    if page_num is None:
+        page_num = 1
+    page_obj = p.get_page(page_num)
+
+    return render(request, 'hot_question_page.html', {
+        'registered_user': 'Ivan',
+        'questions': page_obj,
+        'question_tags': models.Question.objects.all_tags(),
+        'page': p.page(page_num),
+    })

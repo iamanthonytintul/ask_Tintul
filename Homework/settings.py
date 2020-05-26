@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'Homework.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'AskForItDB',
+        'NAME': 'AskTintul',
         'USER': 'anthonytintul',
         'PASSWORD': 'password',
         'HOST': '127.0.0.1',

@@ -28,4 +28,6 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('signup/', views.signup, name='signup'),
     path('setting/', views.setting, name='setting'),
+    path('tag/<slug:tid>/', views.questions_tags, name="tag"),
+    path('hot_questions/', views.hot_question, name="hot")
 ]

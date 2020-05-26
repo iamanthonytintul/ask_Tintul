@@ -12,18 +12,15 @@
 
     <div class="col-md-9 py-4 pl-2 d-flex flex-column position-static">
         <h3 class="mb-0">{{ question.title }}</h3>
-        <p class="card-text mb-auto">Lorem inpsum - dolor sit amet, consectetuer adipisicking elit, sed
-            diam
-            nonummy nibh eusimod tincidunt ut laureet dlore magna aliquam erat bolub. Ut wie enindm ad
-            minim vieion, uena suwurjd exexri tation ullamcorper susipit loborits biskl ut alkuqueo ex
-            ea
-            commoso cuoesukd
-        </p>
+        <p class="card-text mb-auto">{{ question.description }}</p>
 
         <div class="row p-3">
             <p class="pt-1 pr-1">Tags:</p>
-            <a class="pt-1 pr-1" href="#">black-jack</a>
-            <a class="pt-1 pr-1" href="#">bender</a>
+
+            {% for val in tag %}
+                <a class="pt-1 pr-1 " href="{% url 'tag' tid=val.id %}">{{ val.tag_name }}</a>
+            {% endfor %}
+
         </div>
 
     </div>

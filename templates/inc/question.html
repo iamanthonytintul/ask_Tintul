@@ -19,15 +19,19 @@
 
         </h3>
 
-        <p class="card-text mb-auto">Guys, I have trouble with a moon park. Can't find the
-            black-jack</p>
+        <p class="card-text mb-auto">{{ question.description }} </p>
 
         <div class="row p-3">
-            <a class="pt-1 pr-3" href="{% url 'question' qid=question.id %}">answer(2)</a>
+            <a class="pt-1 pr-3" href="{% url 'question' qid=question.id %}">answers({{ question.question__count }})</a>
             <p class="pt-1 pr-1">Tags:</p>
-            <a class="pt-1 pr-1" href="#">black-jack</a>
-            <a class="pt-1 pr-1" href="#">bender</a>
-        </div>
+            {% for key, value in question_tags.items %}
+                {% if key == question.id %}
+                    {% for val in value %}
+                        <a class="pt-1 pr-1 " href="{% url 'tag' tid=val.id %}">{{ val.tag_name }}</a>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
 
+        </div>
     </div>
 </div>

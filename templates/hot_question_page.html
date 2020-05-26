@@ -2,8 +2,7 @@
 
 {% block page_title %}
     <div class="row pl-3 py-2">
-        <h4 class="pr-2">New Questions</h4>
-        <a class="pt-1" href="{% url 'hot' %}">Hot questions</a>
+        <h4 class="pr-2">Hot Questions</h4>
     </div>
 {% endblock %}
 
@@ -14,6 +13,5 @@
     {% endfor %}
 
     {% include 'inc/pagination.html' %}
-
 
 {% endblock %}

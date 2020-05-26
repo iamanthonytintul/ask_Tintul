@@ -4,8 +4,8 @@
 
     {% include 'inc/head_question.html' %}
 
-    {% for answer in answers %}
-        {% include 'inc/answer.html' %}
+    {% for ans in answers %}
+        {% include 'inc/answer.html' with answer=ans %}
     {% endfor %}
 
     <hr>
