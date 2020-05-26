@@ -29,7 +29,6 @@ class QuestionManager(models.Manager):
         return self.order_by('-creation_time')
 
     def popular(self):
-        # self.annotate(num_likes=Count('question_likes'))
         return self.annotate(num_of_answers=Count('question_answer')).order_by('-num_of_answers')
 
     def answers(self, qid):
@@ -38,7 +37,8 @@ class QuestionManager(models.Manager):
 
 
 class TagManager(models.Manager):
-    pass
+    def popular(self):
+        return self.annotate(num_of_questions=Count('Questions')).order_by('-num_of_questions')[:10]
 
 
 class Profile(models.Model):
@@ -96,6 +96,7 @@ class Question(models.Model):
 
     def sum_rating(self):
         return self.votes.sum_rating()
+
 
 class Answer(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name="answer_author")
