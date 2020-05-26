@@ -14,6 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('--questions', type=int)
         parser.add_argument('--answers', type=int)
         parser.add_argument('--tags', type=int)
+        parser.add_argument('--likes', type=int)
 
     def fill_profiles(self, cnt):
         for i in range(cnt):
@@ -42,7 +43,6 @@ class Command(BaseCommand):
             profile_count = f.random_int(min=1, max=profile_ids)
             Profile.objects.get(pk=profile_count).answer_author.add(a)
 
-
     def fill_questions(self, cnt):
         profile_ids = Profile.objects.get_queryset().count()
         tag_ids = list(
@@ -55,14 +55,17 @@ class Command(BaseCommand):
                 'id', flat=True
             )
         )
+        likes_count = f.random_int(min=0, max=1000)
         for i in range(cnt):
             q = Question.objects.create(
                 description=' '.join(f.sentences(f.random_int(min=2, max=5))),
                 title=f.sentence()[:64],
+                votes=likes_count,
             )
             tags_count = f.random_int(min=1, max=10)
             for j in range(tags_count):
                 q.question_tag.add(Tag.objects.get(pk=choice(tag_ids)))
+
             answer_count = f.random_int(min=1, max=25)
             for j in range(answer_count):
                 q.question_answer.add(Answer.objects.get(pk=choice(answer_ids)))
@@ -70,10 +73,37 @@ class Command(BaseCommand):
             profile_count = f.random_int(min=1, max=profile_ids)
             Profile.objects.get(pk=profile_count).question_author.add(q)
 
+    def fill_likes(self, cnt):
+        profile_ids = Profile.objects.get_queryset().count()
+        answer_ids = list(
+            Answer.objects.values_list(
+                'id', flat=True
+            )
+        )
+        question_ids = list(
+            Question.objects.values_list(
+                'id', flat=True
+            )
+        )
+        for i in range(cnt):
+            likes_count = f.random_int(min=0, max=cnt)
+            votes = [-1, 1]
+            vote = choice(votes)
+            profile_count = f.random_int(min=1, max=profile_ids)
+            l = LikeDislike.objects.create(user=Profile.objects.get(pk=profile_count),
+                                           content_object=Question.objects.get(pk=choice(question_ids)), vote=vote)
+            l.save()
+            vote = choice(votes)
+            profile_count = f.random_int(min=1, max=profile_ids)
+            l = LikeDislike.objects.create(user=Profile.objects.get(pk=profile_count),
+                                           content_object=Answer.objects.get(pk=choice(answer_ids)), vote=vote)
+            l.save()
+
+
     def handle(self, *args, **options):
         # self.fill_profiles(options.get('profiles', 10))
         # self.fill_answers(options.get('answers', 10))
         # self.fill_tags(options.get('tags', 10))
-        self.fill_questions(options.get('questions', 10))
+        # self.fill_questions(options.get('questions', 10))
 
-        # self.fill_likes(options.get('likes', 140))
+        self.fill_likes(options.get('likes', 140))

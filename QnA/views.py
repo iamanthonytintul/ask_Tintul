@@ -1,4 +1,3 @@
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.shortcuts import get_object_or_404
@@ -23,7 +22,6 @@ def index(request):
     return render(request, 'main_page.html', {
         'registered_user': 'Ivan',
         'questions': page_obj,
-        'question_tags': models.Question.objects.all_tags(),
         'page': p.page(page_num),
     })
 
@@ -38,13 +36,10 @@ def ask(request):
 
 def question(request, qid):
     question_ = get_object_or_404(models.Question, pk=qid)
-    answers = list(models.Question.objects.answers(question_.id))
 
     return render(request, 'question_page.html', {
         'registered_user': 'Ivan',
         'question': question_,
-        'answers': answers,
-        'tag': models.Question.objects.tag(qid),
     })
 
 
@@ -71,8 +66,6 @@ def questions_tags(request, tid):
     return render(request, 'question_tag_page.html', {
         'registered_user': 'Ivan',
         'tag': tag,
-        'question_tags': models.Question.objects.all_tags(),
-        'questions': questions,
         'page': p.page(page_num)
     })
 
@@ -82,6 +75,7 @@ def setting(request):
         'registered_user': 'Ivan',
         'text_fields': ['Login', 'Email', 'Nickname'],
     })
+
 
 def hot_question(request):
     hot_questions = models.Question.objects.popular()
@@ -94,6 +88,5 @@ def hot_question(request):
     return render(request, 'hot_question_page.html', {
         'registered_user': 'Ivan',
         'questions': page_obj,
-        'question_tags': models.Question.objects.all_tags(),
         'page': p.page(page_num),
     })

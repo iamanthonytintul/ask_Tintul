@@ -7,7 +7,7 @@
             <img class="align-content-center rounded" width="64" height="64"
                  src="{% static 'img/switzerland.jpg' %}">
         </div>
-        {% include 'inc/like_bar.html' %}
+        {% include 'inc/like_bar.html' with likes=question.votes %}
 
     </div>
 
@@ -20,18 +20,12 @@
         </h3>
 
         <p class="card-text mb-auto">{{ question.description }} </p>
-
-        <div class="row p-3">
-            <a class="pt-1 pr-3" href="{% url 'question' qid=question.id %}">answers({{ question.question__count }})</a>
-            <p class="pt-1 pr-1">Tags:</p>
-            {% for key, value in question_tags.items %}
-                {% if key == question.id %}
-                    {% for val in value %}
-                        <a class="pt-1 pr-1 " href="{% url 'tag' tid=val.id %}">{{ val.tag_name }}</a>
-                    {% endfor %}
-                {% endif %}
+        <a class="pt-1" href="{% url 'question' qid=question.id %}">answers({{ question.num_of_answers }})</a>
+        <p class="pt-1 pr-1">Tags:</p>
+        <div class="p-1 mb-1 rounded">
+            {% for t in question.all_tags %}
+                <a class="pt-1 pr-1 badge badge-primary" href="{% url 'tag' tid=t.id %}">{{ t.tag_name }}</a>
             {% endfor %}
-
         </div>
     </div>
 </div>

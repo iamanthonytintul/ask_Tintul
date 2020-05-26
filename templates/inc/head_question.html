@@ -5,7 +5,7 @@
         <div class="d-flex flex-column align-content-center m-1">
             <img class="align-content-center rounded" width="128" height="128" src="{% static 'img/switzerland.jpg' %}">
         </div>
-        {% include 'inc/like_bar.html' %}
+        {% include 'inc/like_bar.html' with likes=question.votes %}
 
     </div>
 
@@ -14,13 +14,11 @@
         <h3 class="mb-0">{{ question.title }}</h3>
         <p class="card-text mb-auto">{{ question.description }}</p>
 
-        <div class="row p-3">
-            <p class="pt-1 pr-1">Tags:</p>
-
-            {% for val in tag %}
-                <a class="pt-1 pr-1 " href="{% url 'tag' tid=val.id %}">{{ val.tag_name }}</a>
+        <p class="pt-1 pr-1">Tags:</p>
+        <div class="p-1 mb-1 rounded">
+            {% for t in question.all_tags %}
+                <a class="pt-1 pr-1 badge badge-primary" href="{% url 'tag' tid=t.id %}">{{ t.tag_name }}</a>
             {% endfor %}
-
         </div>
 
     </div>

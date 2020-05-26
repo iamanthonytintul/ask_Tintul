@@ -32,29 +32,13 @@ class QuestionManager(models.Manager):
         # self.annotate(num_likes=Count('question_likes'))
         return self.annotate(num_of_answers=Count('question_answer')).order_by('-num_of_answers')
 
-    def all_tags(self):
-        question_tags = {}
-        for q in self.get_queryset():
-            question = self.get(id=q.id)
-            question_tags[q.id] = list(question.question_tag.all())
-        return question_tags
-
-    def tag(self, qid):
-        question = self.get(id=qid)
-        return list(question.question_tag.all())
-
-    def num_of_answers(self):
-        return Count('question_answer')
-
     def answers(self, qid):
         question = self.get(id=qid)
         return question.question_answer.all()
 
 
 class TagManager(models.Manager):
-    def question_by_tag(self, tid):
-        tag = self.get(id=tid)
-        return tag.Questions.all()
+    pass
 
 
 class Profile(models.Model):
@@ -64,13 +48,16 @@ class Profile(models.Model):
 
 
 class LikeDislike(models.Model):
-    like = 1
-    dislike = -1
+    LIKE = 1
+    DISLIKE = -1
 
-    votes = ((dislike, 'don\'t like it'), (like, 'like it'))
+    VOTES = (
+        (DISLIKE, 'Don\'t like'),
+        (LIKE, 'Like')
+    )
 
-    vote = models.SmallIntegerField(verbose_name='Vote', choices=votes)
-    user = models.ForeignKey(Profile, verbose_name="Profile", on_delete=models.CASCADE)
+    vote = models.SmallIntegerField(verbose_name='Vote', choices=VOTES)
+    user = models.ForeignKey(Profile, verbose_name="Profile", on_delete=models.CASCADE, related_name='users_like')
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -88,7 +75,7 @@ class Question(models.Model):
 
     creation_time = models.DateTimeField(auto_now_add=True)
 
-    votes = GenericRelation(LikeDislike, related_query_name='questions')
+    votes = GenericRelation(LikeDislike, related_query_name='questions_rating')
 
     objects = QuestionManager()
 
@@ -98,6 +85,17 @@ class Question(models.Model):
     def __unicode__(self):
         return self.title
 
+    def all_tags(self):
+        return list(self.question_tag.all())
+
+    def all_answers(self):
+        return list(self.question_answer.all())
+
+    def num_of_answers(self):
+        return len(list(self.question_answer.all()))
+
+    def sum_rating(self):
+        return self.votes.sum_rating()
 
 class Answer(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name="answer_author")
@@ -106,7 +104,7 @@ class Answer(models.Model):
 
     creation_time = models.DateTimeField(auto_now_add=True)
 
-    votes = GenericRelation(LikeDislike, related_query_name='answers')
+    votes = GenericRelation(LikeDislike, related_query_name='answers_rating')
 
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True, related_name='question_answer')
 
@@ -124,3 +122,6 @@ class Tag(models.Model):
 
     def __unicode__(self):
         return self.tag_name
+
+    def all_questions(self):
+        return self.Questions.all()

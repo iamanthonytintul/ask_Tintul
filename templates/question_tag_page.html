@@ -8,7 +8,7 @@
 
 {% block content %}
 
-    {% for question in questions %}
+    {% for question in tag.all_questions %}
         {% include 'inc/question.html' %}
     {% endfor %}
 
