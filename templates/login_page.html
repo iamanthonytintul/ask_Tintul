@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load bootstrap4 %}
 
 {% block page_title %}
     <div class="row pl-3 py-2">
@@ -7,33 +8,15 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="row">
-        <div class="col-md-2">
-            <p class="p-2">Login</p>
-        </div>
-        <div class="col-md-10 input-group mb-3">
-            <input type="text" class="form-control" placeholder="Login" aria-label="Username"
-                   aria-describedby="basic-addon1">
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2">
-            <p class="p-2">Password</p>
-        </div>
-        <div class="col-md-10">
-            <div class="input-group mb-3">
-                <input type="password" id="inputPassword" class="form-control" placeholder="Password"
-                       required="">
-
-            </div>
-
-            <a href="main_page.html" class="btn my-2 my-sm-0 btn-success" role="button" aria-pressed="true">Log In!</a>
-            <div class="my-2">
-                <a href="#">Create new account</a>
-            </div>
-        </div>
+    <form class="form mt-2" action="./?continue={{ redirect_reference }}" method="POST" novalidate>
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button  type="submit" class="btn btn-success">Login</button>
+        {% endbuttons %}
+    </form>
+    <div class="my-2">
+        <a href="{% url 'signup' %}">Create new account</a>
     </div>
 
 {% endblock %}

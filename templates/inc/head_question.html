@@ -3,7 +3,11 @@
 
     <div class="d-flex flex-column align-content-center col-md-3 p-4">
         <div class="d-flex flex-column align-content-center m-1">
-            <img class="align-content-center rounded" width="128" height="128" src="{% static 'img/switzerland.jpg' %}">
+            {% if question.author.avatar %}
+                <img class="align-content-center rounded" width="128" height="128" src="{{ question.author.avatar }}">
+            {% else %}
+                <img class="align-content-center rounded" width="128" height="128" src="{% static 'img/avatar.png' %}">
+            {% endif %}
         </div>
         {% include 'inc/like_bar.html' with likes=question.votes %}
 

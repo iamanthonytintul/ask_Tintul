@@ -1,11 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import  User
 from django.db.models import Count
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.urls import reverse
 from django.db.models import Sum
-from datetime import datetime
+
 
 class LikeDislikeManager(models.Manager):
     use_for_related_fields = True
@@ -38,25 +38,22 @@ class QuestionManager(models.Manager):
 
 class TagManager(models.Manager):
     def popular(self):
-        return self.annotate(num_of_questions=Count('Questions')).order_by('-num_of_questions')[:10]
+        return self.annotate(num_of_questions=Count('question_tag')).order_by('-num_of_questions')[:10]
 
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField()
-    nickname = models.CharField(max_length=50)
+    avatar = models.ImageField(null=True, upload_to='upload/')
+    nickname = models.CharField(max_length=50, null=True)
 
 
 class LikeDislike(models.Model):
-    LIKE = 1
-    DISLIKE = -1
+    like = 1
+    dislike = -1
 
-    VOTES = (
-        (DISLIKE, 'Don\'t like'),
-        (LIKE, 'Like')
-    )
+    votes = ((dislike, 'Don\'t like'), (like, 'Like'))
 
-    vote = models.SmallIntegerField(verbose_name='Vote', choices=VOTES)
+    vote = models.SmallIntegerField(verbose_name='Vote', choices=votes)
     user = models.ForeignKey(Profile, verbose_name="Profile", on_delete=models.CASCADE, related_name='users_like')
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -66,10 +63,21 @@ class LikeDislike(models.Model):
     objects = LikeDislikeManager()
 
 
+class Tag(models.Model):
+    tag_name = models.CharField(unique=True, max_length=255)
+    objects = TagManager()
+
+    def get_absolute_url(self):
+        return reverse('tag', kwargs={'tid': self.tag_name})
+
+    def all_questions(self):
+        return self.question_tag.all()
+
+
 class Question(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name='question_author')
 
-    title = models.CharField(max_length=64)
+    title = models.CharField(max_length=30)
 
     description = models.TextField()
 
@@ -77,16 +85,15 @@ class Question(models.Model):
 
     votes = GenericRelation(LikeDislike, related_query_name='questions_rating')
 
+    tags = models.ManyToManyField(Tag, related_name='question_tag')
+
     objects = QuestionManager()
 
     def get_absolute_url(self):
         return reverse('question', kwargs={"qid": self.id})
 
-    def __unicode__(self):
-        return self.title
-
     def all_tags(self):
-        return list(self.question_tag.all())
+        return list(self.tags.all())
 
     def all_answers(self):
         return list(self.question_answer.all())
@@ -101,7 +108,7 @@ class Question(models.Model):
 class Answer(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name="answer_author")
 
-    description = models.TextField()
+    answer_text = models.TextField()
 
     creation_time = models.DateTimeField(auto_now_add=True)
 
@@ -109,20 +116,6 @@ class Answer(models.Model):
 
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True, related_name='question_answer')
 
+    is_correct = models.BooleanField()
+
     objects = AnswerManager()
-
-
-class Tag(models.Model):
-    tag_name = models.CharField(max_length=25)
-    Questions = models.ManyToManyField(Question, related_name='question_tag')
-
-    objects = TagManager()
-
-    def get_absolute_url(self):
-        return reverse('tag', kwargs={'tid': self.tag_name})
-
-    def __unicode__(self):
-        return self.tag_name
-
-    def all_questions(self):
-        return self.Questions.all()

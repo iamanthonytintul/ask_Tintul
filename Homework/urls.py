@@ -13,9 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
+from Homework import settings
 from QnA import views
 
 
@@ -27,7 +29,9 @@ urlpatterns = [
     path('question/<int:qid>/', views.question, name='question'),
     path('login/', views.login, name='login'),
     path('signup/', views.signup, name='signup'),
-    path('setting/', views.setting, name='setting'),
-    path('tag/<slug:tid>/', views.questions_tags, name="tag"),
-    path('hot_questions/', views.hot_question, name="hot")
-]
+    path('profile/edit', views.profile_edit, name='profile_edit'),
+    path('tag/<slug:tid>/', views.questions_tags, name='tag'),
+    path('hot_questions/', views.hot_question, name='hot'),
+    path('logout/', views.logout_view, name='logout'),
+    path('answer/<int:qid>/', views.answer, name='answer'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

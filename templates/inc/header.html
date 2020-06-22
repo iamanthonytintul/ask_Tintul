@@ -5,37 +5,41 @@
 
         <a class="navbar-brand text-decoration-none text-dark" href="{% url 'home' %}">Legen... Ask For It!</a>
 
-
         <form class="form-inline">
             <input class="form-control mr-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0 mr-2" type="submit">Search</button>
             <a href="{% url 'ask' %}" class="btn my-2 my-sm-0 btn-success" role="button" aria-pressed="true">ASK!</a>
         </form>
 
-        {% if registred_user %}
+        {% if user.is_authenticated %}
             <div class="nav-item nav-link">
                 <div class="row">
 
                     <div class="col-sm-5">
-                        <img class="align-content-center rounded" width="64" height="64"
-                                 src="{% static 'img/switzerland.jpg' %}">
+                        {% if question.author.avatar %}
+                            <img class="align-content-center rounded" width="64" height="64"
+                             src="{{ request.user.profile.avatar }}">
+                        {% else %}
+                            <img class="align-content-center rounded" width="64" height="64"
+                                 src="{% static 'img/avatar.png' %}">
+                        {% endif %}
                     </div>
 
                     <div class="col-sm-7">
                         <div class="row">
-                            <p class="mb-1 p-1">Dr.Pepper</p>
+                            <p class="mb-1 p-1">{{ request.user.profile.nickname }}</p>
                         </div>
                         <div class="row">
-                            <a class="p-1" href="{% url 'setting' %}">Settings</a>
-                            <a class="p-1" href="{% url 'home' %}">Log out</a>
+                            <a class="p-1" href="{% url 'profile_edit' %}">Settings</a>
+                            <a class="p-1" href="{% url 'logout' %}?continue={{ request.path }}">Log out</a>
                         </div>
                     </div>
                 </div>
             </div>
         {% else %}
             <div class="nav-item nav-link">
-                <a class="p-1" href="{% url 'login' %}">Log in</a>
-                <a class="p-1" href="{% url 'signup' %}">Register</a>
+                <a class="p-1" href="{% url 'login' %}?continue={{ request.path }}">Log in</a>
+                <a class="p-1" href="{% url 'signup' %}?continue={{ request.path }}">Register</a>
             </div>
         {% endif %}
 

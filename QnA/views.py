@@ -1,7 +1,14 @@
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.forms import forms
 from django.shortcuts import render
-from django.core.paginator import Paginator, PageNotAnInteger
-from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import auth
+from django.urls import reverse
+
 from QnA import models
+from QnA.forms import LoginForm, QuestionForm, AnswerForm, RegistrationForm, EditForm
 
 
 def paginate(object_list, request, per_page=5):
@@ -10,67 +17,95 @@ def paginate(object_list, request, per_page=5):
     return paginator, page_num
 
 
-def side_bar_info():
-    tags = models.Tag.objects.popular()
-    return tags
-
-
 def index(request):
-    popular_tags = side_bar_info()
-    questions = models.Question.objects.new()
-    paginator, page_num = paginate(questions, request, 5)
+    popular_tags = models.Tag.objects.popular()
+    paginator, page_num = paginate(models.Question.objects.new(), request, 5)
     return render(request, 'main_page.html', {
-        'registered_user': 'Ivan',
+        'user': request.user,
         'questions': paginator.get_page(page_num),
         'page': paginator.page(page_num),
         'popular_tags': popular_tags,
     })
 
 
-def ask(request):
-    popular_tags = side_bar_info()
-    return render(request, 'ask_page.html', {
-        'registered_user': 'Ivan',
-        'text_fields': ['Title', 'Tags', ],
-        'text_areas': ['Question', ],
-        'popular_tags': popular_tags,
-    })
-
-
 def question(request, qid):
-    popular_tags = side_bar_info()
-    question_ = get_object_or_404(models.Question, pk=qid)
+    popular_tags = models.Tag.objects.popular()
+    single_question = get_object_or_404(models.Question, pk=qid)
+    if request.user.is_authenticated:
+        form = AnswerForm(request.user.profile)
+        return render(request, 'question_page.html', {
+            'question': single_question,
+            'popular_tags': popular_tags,
+            'form': form,
+        })
     return render(request, 'question_page.html', {
-        'registered_user': 'Ivan',
-        'question': question_,
+        'question': single_question,
         'popular_tags': popular_tags,
     })
 
 
 def login(request):
-    popular_tags = side_bar_info()
+    popular_tags = models.Tag.objects.popular()
+    redirect_reference = request.GET.get('continue')
+
+    if request.method == 'GET':
+        form = LoginForm()
+        return render(request, 'login_page.html', {
+            'popular_tags': popular_tags,
+            'form': form,
+            'redirect_reference': redirect_reference
+        })
+
+    form = LoginForm(data=request.POST)
+    if form.is_valid():
+        user = auth.authenticate(request, **form.cleaned_data)
+        if user is not None:
+            auth.login(request, user)
+            return redirect(redirect_reference)
+        else:
+            form.add_error(None, 'Login or password is incorrect')
     return render(request, 'login_page.html', {
         'popular_tags': popular_tags,
+        'form': form,
+        'redirect_reference': redirect_reference
     })
 
 
 def signup(request):
-    popular_tags = side_bar_info()
+    popular_tags = models.Tag.objects.popular()
+    redirect_reference = request.GET.get('continue')
+    if request.method == 'GET':
+        form = RegistrationForm()
+        return render(request, 'signup_page.html', {
+            'popular_tags': popular_tags,
+            'form': form,
+            'redirect_reference': redirect_reference,
+        })
+
+    form = RegistrationForm(request.POST, request.FILES)
+    if form.is_valid():
+        form.save()
+        print('redirect_reference=' + redirect_reference)
+        user = auth.authenticate(request, **form.cleaned_data)
+        if user is not None:
+            auth.login(request, user)
+            return redirect(redirect_reference)
+        else:
+            form.add_error(None, 'Login or password is incorrect')
+        return redirect(redirect_reference)
+
     return render(request, 'signup_page.html', {
-        'text_fields': ['Login', 'Email', 'Nickname', ],
-        'password_fields': ['Password', 'Repeat password', ],
-        'text_areas': ['Question', ],
         'popular_tags': popular_tags,
+        'form': form,
+        'redirect_reference': redirect_reference,
     })
 
-
 def questions_tags(request, tid):
-    popular_tags = side_bar_info()
+    popular_tags = models.Tag.objects.popular
     tag = get_object_or_404(models.Tag, pk=tid)
-    question = tag.all_questions()
-    paginator, page_num = paginate(question, request, 5)
+    paginator, page_num = paginate(tag.all_questions(), request, 5)
     return render(request, 'question_tag_page.html', {
-        'registered_user': 'Ivan',
+        'user': request.user,
         'tag': tag,
         'question': paginator.get_page(page_num),
         'page': paginator.page(page_num),
@@ -78,22 +113,85 @@ def questions_tags(request, tid):
     })
 
 
-def setting(request):
-    popular_tags = side_bar_info()
-    return render(request, 'setting_page.html', {
-        'registered_user': 'Ivan',
-        'text_fields': ['Login', 'Email', 'Nickname'],
+def hot_question(request):
+    popular_tags = models.Tag.objects.popular()
+    paginator, page_num = paginate(models.Question.objects.popular(), request, 5)
+    return render(request, 'hot_question_page.html', {
+        'user': request.user,
+        'questions': paginator.get_page(page_num),
+        'page': paginator.page(page_num),
         'popular_tags': popular_tags,
     })
 
 
-def hot_question(request):
-    popular_tags = side_bar_info()
-    hot_questions = models.Question.objects.popular()
-    paginator, page_num = paginate(hot_questions, request, 5)
-    return render(request, 'hot_question_page.html', {
-        'registered_user': 'Ivan',
-        'questions': paginator.get_page(page_num),
-        'page': paginator.page(page_num),
+def logout_view(request):
+    logout(request)
+    return redirect(request.GET.get('continue'))
+
+#
+# def profile_registration(request):
+#     redirect_reference = request.GET.get('continue')
+#     form = RegistrationForm(request.POST, request.FILES)
+#     if form.is_valid():
+#         form.save()
+#         print('redirect_reference=' + redirect_reference)
+#         user = auth.authenticate(request, **form.cleaned_data)
+#         if user is not None:
+#             auth.login(request, user)
+#             return redirect(redirect_reference)
+#         else:
+#             form.add_error(None, 'Login or password is incorrect')
+#         return redirect(redirect_reference)
+#     return redirect(reverse)
+
+
+@login_required(redirect_field_name="continue")
+def ask(request):
+    popular_tags = models.Tag.objects.popular()
+    if request.method == 'GET':
+        form = QuestionForm(request.user.profile)
+        return render(request, 'ask_page.html', {
+            'form': form,
+            'popular_tags': popular_tags,
+        })
+
+    form = QuestionForm(request.user.profile, data=request.POST)
+    if form.is_valid():
+        single_question = form.save()
+        return redirect(reverse('question', kwargs={'qid': single_question.pk}))
+    return render(request, 'ask_page.html', {
+        'user': request.user,
+        'form': form,
         'popular_tags': popular_tags,
+    })
+
+
+@login_required(redirect_field_name="continue")
+def answer(request, qid):
+    form = AnswerForm(request.user.profile, data=request.POST)
+    if form.is_valid():
+        a = form.save(qid)
+        return redirect(reverse('question', kwargs={'qid': qid}) + '#answer-' + str(a.pk))
+
+
+@login_required()
+def profile_edit(request):
+    popular_tags = models.Tag.objects.popular()
+    if request.method == "GET":
+        form = EditForm()
+        return render(request, 'setting_page.html', {
+            'popular_tags': popular_tags,
+            'form': form,
+        })
+    form = EditForm(request.POST, request.FILES)
+
+    if form.is_valid():
+        form.save(request.user)
+        return redirect(reverse('index'))
+    else:
+        form.add_error(None, 'Check input data')
+
+    return render(request, 'setting_page.html', {
+        'popular_tags': popular_tags,
+        'form': form,
     })

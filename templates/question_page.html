@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load bootstrap4 %}
 
 {% block content %}
 
@@ -9,10 +10,22 @@
     {% endfor %}
 
     <hr>
-    <div class="mb-3 input-group">
-        <textarea class="form-control" placeholder="Enter your answer" aria-label="With textarea"></textarea>
-    </div>
-
-    <button type="button" class="mb-2 btn btn-success">Answer</button>
+    {% if request.user.is_authenticated %}
+        <form class="form mt-2" action="{% url 'answer' qid=question.pk %}?continue={{ request.path }}" method="POST"
+              novalidate>
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            {% buttons %}
+                <button type="submit" class="btn btn-success">Submit!</button>
+            {% endbuttons %}
+        </form>
+    {% else %}
+        <div class="nav-item nav-link">
+            <a class="p-1" href="{% url 'login' %}?continue={{ request.path }}">Log in</a>
+            <span> or </span>
+            <a class="p-1" href="{% url 'signup' %}">Register</a>
+            <span> to answer it </span>
+        </div>
+    {% endif %}
 
 {% endblock %}
