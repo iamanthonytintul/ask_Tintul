@@ -7,23 +7,6 @@ from django.urls import reverse
 from django.db.models import Sum
 
 
-class LikeDislikeManager(models.Manager):
-    use_for_related_fields = True
-
-    def likes(self):
-        return self.get_queryset().filter(vote__gt=0)
-
-    def dislikes(self):
-        return self.get_queryset().filter(vote__lt=0)
-
-    def sum_rating(self):
-        return self.get_queryset().aggregate(Sum('vote')).get('vote__sum') or 0
-
-
-class AnswerManager(models.Manager):
-    pass
-
-
 class QuestionManager(models.Manager):
     def new(self):
         return self.order_by('-creation_time')
@@ -48,10 +31,10 @@ class Profile(models.Model):
 
 
 class LikeDislike(models.Model):
-    like = 1
-    dislike = -1
+    LIKE = 1
+    DISLIKE = -1
 
-    votes = ((dislike, 'Don\'t like'), (like, 'Like'))
+    votes = ((DISLIKE, 'Don\'t like'), (LIKE, 'Like'))
 
     vote = models.SmallIntegerField(verbose_name='Vote', choices=votes)
     user = models.ForeignKey(Profile, verbose_name="Profile", on_delete=models.CASCADE, related_name='users_like')
@@ -60,7 +43,6 @@ class LikeDislike(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()
 
-    objects = LikeDislikeManager()
 
 
 class Tag(models.Model):
@@ -93,16 +75,24 @@ class Question(models.Model):
         return reverse('question', kwargs={"qid": self.id})
 
     def all_tags(self):
-        return list(self.tags.all())
+        return self.tags.all()
 
     def all_answers(self):
-        return list(self.question_answer.all())
+        return self.question_answer.all()
 
     def num_of_answers(self):
-        return len(list(self.question_answer.all()))
+        return len(self.question_answer.all())
+
+    def likes(self):
+        return len(self.votes.filter(vote=1))
+
+    def dislikes(self):
+        return len(self.votes.filter(vote=-1))
 
     def sum_rating(self):
-        return self.votes.sum_rating()
+        like = len(self.votes.filter(vote=1))
+        dislike = len(self.votes.filter(vote=-1))
+        return like - dislike
 
 
 class Answer(models.Model):
@@ -116,6 +106,15 @@ class Answer(models.Model):
 
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True, related_name='question_answer')
 
-    is_correct = models.BooleanField()
+    is_correct = models.BooleanField(default=False)
 
-    objects = AnswerManager()
+    def likes(self):
+        return len(self.votes.filter(vote=1))
+
+    def dislikes(self):
+        return len(self.votes.filter(vote=-1))
+
+    def sum_rating(self):
+        like = len(self.votes.filter(vote=1))
+        dislike = len(self.votes.filter(vote=-1))
+        return like-dislike

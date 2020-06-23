@@ -1,5 +1,58 @@
 <div class="d-flex flex-column align-content-center m-1">
-    <button type="button" class="mx-2 btn btn-outline-success btn-sm">+</button>
-    <div class="d-flex justify-content-center">{{ likes.sum_rating }}</div>
-    <button type="button" class="mx-2 btn btn-outline-danger btn-sm">-</button>
+    {% if answer %}
+        <button type="button" class="likeAnswer{{ answer.pk }} mx-2 btn btn-outline-success btn-sm"
+                id="{{ answer.pk }}">+
+        </button>
+        <div class="d-flex justify-content-center" id="answer{{ answer.pk }}">{{ answer.sum_rating }}</div>
+        <button type="button" class="dislikeAnswer{{ answer.pk }} mx-2 btn btn-outline-danger btn-sm"
+                id="{{ answer.pk }}">-
+        </button>
+    {% elif question %}
+        <button type="button" class="likeQuestion{{ question.pk }} mx-2 btn btn-outline-success btn-sm"
+                id="{{ question.pk }}">+
+        </button>
+        <div class="d-flex justify-content-center" id="question{{ question.pk }}">{{ question.sum_rating }}</div>
+        <button type="button" class="dislikeQuestion{{ question.pk }} mx-2 btn btn-outline-danger btn-sm"
+                id="{{ question.pk }}">-
+        </button>
+    {% endif %}
 </div>
+
+<script
+        src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous"></script>
+<script>
+    $('.like' + {% if answer %}'Answer' + {{ answer.pk }}{% elif question %}'Question' + {{ question.pk }}{% endif %}).click(function () {
+        id = $(this).attr('id');
+        $.ajax({
+            url: '/vote/1/' + {% if answer %}'answer'{% elif question %}'question'{% endif %} +'/' + id + '/',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (data) {
+                $('#' + {% if answer %}'answer'{% elif question %}'question'{% endif %} + id
+            ).
+                text(data['Rating']);
+                console.log(data);
+            }
+        });
+    });
+    $('.dislike' + {% if answer %}'Answer' + {{ answer.pk }}{% elif question %}'Question' + {{ question.pk }}{% endif %}).click(function () {
+        id = $(this).attr('id');
+        $.ajax({
+            url: '/vote/0/' + {% if answer %}'answer'{% elif question %}'question'{% endif %} +'/' + id + '/',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (data) {
+                $('#' + {% if answer %}'answer'{% elif question %}'question'{% endif %} + id
+            ).
+                text(data['Rating']);
+                console.log(data);
+            }
+        });
+    });
+</script>

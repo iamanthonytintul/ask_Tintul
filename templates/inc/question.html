@@ -10,7 +10,7 @@
                 <img class="align-content-center rounded" width="64" height="64" src="{% static 'img/avatar.png' %}">
             {% endif %}
         </div>
-        {% include 'inc/like_bar.html' with likes=question.votes %}
+        {% include 'inc/like_bar.html' with question=question %}
 
     </div>
 

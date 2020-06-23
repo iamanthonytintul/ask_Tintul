@@ -34,4 +34,6 @@ urlpatterns = [
     path('hot_questions/', views.hot_question, name='hot'),
     path('logout/', views.logout_view, name='logout'),
     path('answer/<int:qid>/', views.answer, name='answer'),
+    path('correct_answer/<int:aid>/', views.correct_answer, name='correct_answer'),
+    path('vote/<int:vid>/<str:content_type>/<int:oid>/', views.like_dislike, name='votes'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

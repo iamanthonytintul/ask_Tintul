@@ -11,19 +11,62 @@
                 <img class="align-content-center rounded" width="64" height="64" src="{% static 'img/avatar.png' %}">
             {% endif %}
         </div>
-        {% include 'inc/like_bar.html' with likes=answer.votes %}
+        {% include 'inc/like_bar.html' with answer=answer %}
     </div>
 
     <div class="col-md-10 py-4 pl-2 d-flex flex-column position-static">
         <p class="card-text mb-auto">{{ answer.answer_text }}</p>
 
-        <div class="row p-3">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-                <label class="form-check-label" for="defaultCheck1">
-                    Correct!
-                </label>
-            </div>
-        </div>
+        {% if question.author == request.user.profile %}
+            {% if answer.is_correct %}
+                <div class="row p-3">
+                    <label class="form-check-label {% if answer.is_correct %} text-success {% endif %}"
+                           id="correct-answer{{ answer.pk }}">
+                        Correct!
+                    </label>
+                </div>
+            {% else %}
+                <div class="row p-3">
+                    <input class="correct-answer form-check-input" type="checkbox" id="{{ answer.pk }}">
+                    <label class="form-check-label {% if answer.is_correct %} text-success {% endif %}"
+                           id="correct-answer{{ answer.pk }}">
+                        Correct!
+                    </label>
+                </div>
+            {% endif %}
+        {% else %}
+            {% if answer.is_correct %}
+                <div class="row p-3">
+                    <label class="form-check-label {% if answer.is_correct %} text-success {% endif %}"
+                           id="correct-answer{{ answer.pk }}">
+                        Correct!
+                    </label>
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 </div>
+<script
+        src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous">
+</script>
+<script>
+    $('.correct-answer').click(function () {
+        id = $(this).attr('id');
+        $.ajax({
+            url: '/correct_answer/' + id + '/',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (data) {
+                $('.correct-answer').hide();
+                $('#correct-answer' + id).attr({
+                    "class": "form-check-label text-success"
+                });
+                console.log(data);
+            }
+        });
+    });
+</script>

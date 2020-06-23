@@ -16,7 +16,7 @@
                 <div class="row">
 
                     <div class="col-sm-5">
-                        {% if question.author.avatar %}
+                        {% if request.user.profile.avatar %}
                             <img class="align-content-center rounded" width="64" height="64"
                              src="{{ request.user.profile.avatar }}">
                         {% else %}

@@ -6,7 +6,7 @@
     {% include 'inc/head_question.html' %}
 
     {% for ans in question.all_answers %}
-        {% include 'inc/answer.html' with answer=ans %}
+        {% include 'inc/answer.html' with answer=ans question=question%}
     {% endfor %}
 
     <hr>

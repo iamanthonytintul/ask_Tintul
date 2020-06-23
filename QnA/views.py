@@ -1,11 +1,13 @@
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.forms import forms
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import auth
 from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 from QnA import models
 from QnA.forms import LoginForm, QuestionForm, AnswerForm, RegistrationForm, EditForm
@@ -85,7 +87,6 @@ def signup(request):
     form = RegistrationForm(request.POST, request.FILES)
     if form.is_valid():
         form.save()
-        print('redirect_reference=' + redirect_reference)
         user = auth.authenticate(request, **form.cleaned_data)
         if user is not None:
             auth.login(request, user)
@@ -99,6 +100,7 @@ def signup(request):
         'form': form,
         'redirect_reference': redirect_reference,
     })
+
 
 def questions_tags(request, tid):
     popular_tags = models.Tag.objects.popular
@@ -127,22 +129,6 @@ def hot_question(request):
 def logout_view(request):
     logout(request)
     return redirect(request.GET.get('continue'))
-
-#
-# def profile_registration(request):
-#     redirect_reference = request.GET.get('continue')
-#     form = RegistrationForm(request.POST, request.FILES)
-#     if form.is_valid():
-#         form.save()
-#         print('redirect_reference=' + redirect_reference)
-#         user = auth.authenticate(request, **form.cleaned_data)
-#         if user is not None:
-#             auth.login(request, user)
-#             return redirect(redirect_reference)
-#         else:
-#             form.add_error(None, 'Login or password is incorrect')
-#         return redirect(redirect_reference)
-#     return redirect(reverse)
 
 
 @login_required(redirect_field_name="continue")
@@ -195,3 +181,37 @@ def profile_edit(request):
         'popular_tags': popular_tags,
         'form': form,
     })
+
+
+@login_required
+def correct_answer(request, aid):
+    user = request.user.profile
+    answer = models.Answer.objects.get(pk=aid)
+    if answer.question.author == user:
+        answer.is_correct = True
+        answer.save()
+        return JsonResponse({'is_correct': 'True'})
+    return HttpResponse.status_code(403)
+
+
+@login_required
+def like_dislike(request, vid, content_type, oid):
+    vid = vid-1 if vid == 0 else vid
+    if content_type == 'answer':
+        obj = models.Answer.objects.get(pk=oid)
+    elif content_type == 'question':
+        obj = models.Question.objects.get(pk=oid)
+    else:
+        return HttpResponse.status_code(400)
+
+    try:
+        vote_obj = models.LikeDislike.objects.get(content_type=models.ContentType.objects.get_for_model(obj), object_id=obj.pk, user=request.user.profile)
+        if vid != vote_obj.vote:
+            vote_obj.vote = vid
+            vote_obj.save()
+    except models.LikeDislike.DoesNotExist:
+        obj.votes.create(user=request.user.profile, vote=vid)
+
+    return JsonResponse({'Like': obj.likes(),
+                         'Dislike': obj.dislikes(),
+                         'Rating': obj.sum_rating()})
